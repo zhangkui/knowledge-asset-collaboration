@@ -12,5 +12,7 @@
   },
   "generated_at": "2026-08-24",
   "remote_push": "blocked: repository not found / invalid credentials",
-  "trajectory_urls": []
+  "trajectory_urls": [],
+  "repository_url": "https://github.com/zhangkui/knowledge-asset-collaboration",
+  "trajectory_index_url": "https://github.com/zhangkui/knowledge-asset-collaboration/tree/master/trajectory-backup"
 }

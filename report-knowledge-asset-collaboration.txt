@@ -9,7 +9,9 @@ Production Go lines: 5067
 Internal package validation: PASS - go test ./internal/...
 Regression validation: 4 intentional red cases currently expose defects in bug-003, bug-017, bug-019, bug-020; remaining cases execute business assertions.
 Remote push: BLOCKED - GitHub returned Repository not found, token authentication returned invalid credentials
-Trajectory URLs: none (local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
+GitHub repository: https://github.com/zhangkui/knowledge-asset-collaboration
+Trajectory index: https://github.com/zhangkui/knowledge-asset-collaboration/tree/master/trajectory-backup
+Local trajectory backups: F:\go-bug-create\workspace\_trajectory_backup
 
 Bug inventory:
 bug-001 | bugfix | context | Document creation must stop when the request context is cancelled. A client that disconnects while creating a document must not leave a document record behind.
