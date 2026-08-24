@@ -4,10 +4,11 @@ Generated: 2026-08-24
 
 Bugs: 10 (bugfix=6, diagnosis=4)
 Categories: concurrency, nil, slice, error, context
+Scope caveat: current Go source is 1,018 lines across 24 files, below the requested 5,000+ business-line target; the generated project is a compilable baseline, not a complete production implementation.
 Go version: go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
-Build validation: PASS - go test ./...
+Build validation: PASS - go test ./... and go test -race ./...
 Remote push: BLOCKED - GitHub returned Repository not found, token authentication returned invalid credentials
-Trajectory URLs: none (local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
+Trajectory URLs: none (remote push blocked; local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
 
 Bug inventory:
 bug-001 | bugfix | context | Document creation must stop when the request context is cancelled. A client that disconnects while creating a document must not leave a document record behind.
