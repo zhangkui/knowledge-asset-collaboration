@@ -1,0 +1,30 @@
+# Bug 008
+
+## user_query
+Investigate intermittent missing collaborators after simultaneous join and leave operations in the same editor room.
+
+## bug_category
+concurrency
+
+## mode
+diagnosis
+
+## verify_cmds
+- go test ./...
+- go test -race ./internal/...
+
+## gold_root_cause
+调用链：WebSocket 加入/断开 → editor.Hub.Join/Leave → rooms map。中文根因：协作状态依赖内存房间，连接生命周期事件的顺序没有版本化，旧连接的 Leave 可能删除新连接的同一用户状态。失效原因：重连竞态会让在线用户列表短暂丢失。证据：Leave 只按 documentID/userID 删除，不验证连接代数。生产文件/符号：internal/editor/hub.go:Hub.Leave。
+
+## success_criteria
+目标行为：旧连接断开不能删除同一用户的新连接。边界：真正的最后一个连接离开才移除用户。合法场景：单连接加入/离开保持现状。验证标准：并发重连测试最终在线列表保留新连接。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## repository_and_environment
+branch_model: orphan-redgreen
+green_branch: bug008_green
+red_branch: bug008_red
+base_commit(G1_sha): pending-local-commit
+repo_url: https://github.com/zhangkui/knowledge-asset-collaboration/tree/bug008_green

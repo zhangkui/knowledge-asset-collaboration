@@ -1,0 +1,30 @@
+# Bug 007
+
+## user_query
+Investigate why a malformed bearer token can access protected document APIs. The authorization layer must validate token structure, expiry, and signature before returning claims.
+
+## bug_category
+nil
+
+## mode
+diagnosis
+
+## verify_cmds
+- go test ./...
+- go test -race ./internal/...
+
+## gold_root_cause
+调用链：受保护 HTTP 路由 → auth.Service.Authorize。中文根因：Authorize 仅检查 Bearer 前缀和点号数量，没有校验签名与 ExpiresAt。失效原因：任意伪造的三段字符串被当作有效身份。证据：Authorize 直接返回 Claims{Subject:p[0]}。生产文件/符号：internal/auth/service.go:Service.Authorize。
+
+## success_criteria
+目标行为：伪造、过期、签名错误的令牌均拒绝。边界：合法且未过期令牌通过。合法场景：缺少 Authorization 返回 401。验证标准：独立回归测试分别覆盖伪造 token、过期 token 和合法 token。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## repository_and_environment
+branch_model: orphan-redgreen
+green_branch: bug007_green
+red_branch: bug007_red
+base_commit(G1_sha): pending-local-commit
+repo_url: https://github.com/zhangkui/knowledge-asset-collaboration/tree/bug007_green

@@ -1,0 +1,30 @@
+# Bug 006
+
+## user_query
+Expired or cancelled review decisions must not mutate review state.
+
+## bug_category
+context
+
+## mode
+bugfix
+
+## verify_cmds
+- go test ./...
+- go test -race ./internal/...
+
+## gold_root_cause
+调用链：审核决定 API → review.Service.Decide。中文根因：Decide 在加锁前未检查 context，取消请求仍会写入审核记录。失效原因：超时请求可能在客户端已放弃后改变发布流程。证据：生产符号 Decide 缺少 ctx.Err 检查。生产文件/符号：internal/review/service.go:Service.Decide。
+
+## success_criteria
+目标行为：取消上下文不改变审核状态。边界：取消前的正常决定成功；取消后的决定返回 context.Canceled。合法场景：approved/rejected 状态按业务规则保存。验证标准：先写入 pending，再用取消上下文决定，状态仍为 pending。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## repository_and_environment
+branch_model: orphan-redgreen
+green_branch: bug006_green
+red_branch: bug006_red
+base_commit(G1_sha): pending-local-commit
+repo_url: https://github.com/zhangkui/knowledge-asset-collaboration/tree/bug006_green
