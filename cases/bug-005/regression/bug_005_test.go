@@ -1,3 +1,3 @@
 package regression
-
-func ScenarioBug005() string { return "bug-005-regression" }
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/attachment")
+func TestBug005UploadCompletion(t *testing.T){s:=attachment.NewManager();u,err:=s.Start(context.Background(),"d","manual.pdf","application/pdf",10,2);if err!=nil{t.Fatal(err)};_,err=s.PutChunk(context.Background(),u.ID,attachment.Chunk{Number:0,Size:5});if err!=nil{t.Fatal(err)};if _,err=s.Complete(context.Background(),u.ID);err==nil{t.Fatal("incomplete upload must fail")};_,_=s.PutChunk(context.Background(),u.ID,attachment.Chunk{Number:1,Size:5});done,err:=s.Complete(context.Background(),u.ID);if err!=nil||!done.Completed{t.Fatalf("done=%+v err=%v",done,err)}}

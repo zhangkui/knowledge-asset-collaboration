@@ -1,3 +1,3 @@
 package regression
-
-func ScenarioBug001() string { return "bug-001-regression" }
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/document")
+func TestBug001DocumentContext(t *testing.T){r:=document.NewRepository();ctx,cancel:=context.WithCancel(context.Background());cancel();if _,err:=r.Create(ctx,document.Document{Title:"cancelled"});err==nil{t.Fatal("cancelled create must fail")};d,err:=r.Create(context.Background(),document.Document{Title:"valid"});if err!=nil||d.ID==""{t.Fatalf("document=%+v err=%v",d,err)}}

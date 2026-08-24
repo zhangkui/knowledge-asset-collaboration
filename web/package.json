@@ -1,1 +1,9 @@
-{"scripts":{"dev":"vite","build":"vite build"},"dependencies":{"axios":"latest","vite":"latest","vue":"latest","typescript":"latest"}}
+﻿{
+  "name": "knowledge-asset-collaboration-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vite build" },
+  "dependencies": { "@vitejs/plugin-vue": "latest", "axios": "latest", "echarts": "latest", "element-plus": "latest", "pinia": "latest", "vue": "latest", "vue-router": "latest" },
+  "devDependencies": { "typescript": "latest", "vite": "latest", "vue-tsc": "latest" }
+}

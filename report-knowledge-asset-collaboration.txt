@@ -2,13 +2,14 @@ Project: knowledge-asset-collaboration
 Title: Enterprise Knowledge Asset & Document Collaboration Platform
 Generated: 2026-08-24
 
-Bugs: 10 (bugfix=6, diagnosis=4)
-Categories: concurrency, nil, slice, error, context
-Scope caveat: current Go source is 1,018 lines across 24 files, below the requested 5,000+ business-line target; the generated project is a compilable baseline, not a complete production implementation.
+Bugs: 25 (bugfix=15, diagnosis=10)
+Categories: {'concurrency': 5, 'nil': 4, 'slice': 5, 'error': 6, 'context': 5}
 Go version: go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
-Build validation: PASS - go test ./... and go test -race ./...
+Production Go lines: 5067
+Internal package validation: PASS - go test ./internal/...
+Regression validation: 4 intentional red cases currently expose defects in bug-003, bug-017, bug-019, bug-020; remaining cases execute business assertions.
 Remote push: BLOCKED - GitHub returned Repository not found, token authentication returned invalid credentials
-Trajectory URLs: none (remote push blocked; local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
+Trajectory URLs: none (local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
 
 Bug inventory:
 bug-001 | bugfix | context | Document creation must stop when the request context is cancelled. A client that disconnects while creating a document must not leave a document record behind.
@@ -21,9 +22,18 @@ bug-007 | diagnosis | nil | Investigate why a malformed bearer token can access 
 bug-008 | diagnosis | concurrency | Investigate intermittent missing collaborators after simultaneous join and leave operations in the same editor room.
 bug-009 | diagnosis | slice | Investigate why moving a folder with a similarly prefixed ID is rejected even when it is not a descendant.
 bug-010 | diagnosis | error | Investigate why a failed notification read operation can be reported as successful after the request context is cancelled.
-
-Field validation: PASS
-
-Reports:
-F:\go-bug-create\workspace\knowledge-asset-collaboration\report-knowledge-asset-collaboration.txt
-F:\go-bug-create\workspace\knowledge-asset-collaboration\report-knowledge-asset-collaboration.xlsx
+bug-011 | bugfix | context | When a user cancels an annotation request, the annotation service must return context.Canceled and must not create a partial annotation.
+bug-012 | bugfix | error | Completing an attachment must reject unknown attachment IDs and preserve the original upload state.
+bug-013 | diagnosis | slice | Audit log listing must return an isolated snapshot so callers cannot mutate historical events.
+bug-014 | bugfix | error | Resolving a comment must fail for an unknown comment and must persist the resolved flag for a known comment.
+bug-015 | bugfix | concurrency | Concurrent editor presence updates must retain all distinct users in the document room.
+bug-016 | bugfix | context | Saving a document after request cancellation must return the cancellation error and keep the previous version.
+bug-017 | bugfix | nil | Workspace creation must reject a nil context instead of panicking.
+bug-018 | diagnosis | slice | Permission evaluation must honor an explicit deny even when a broader allow grant exists.
+bug-019 | bugfix | error | Creating a share link with a non-positive TTL must return a validation error.
+bug-020 | bugfix | concurrency | Concurrent version creation must produce unique version identifiers for a document.
+bug-021 | diagnosis | context | Expired recycle-bin cleanup must stop promptly when its context is cancelled.
+bug-022 | diagnosis | nil | Report generation must return a usable zero metric set when no activity exists.
+bug-023 | diagnosis | slice | Folder move validation must reject moving a folder into itself or any descendant.
+bug-024 | diagnosis | error | Review decisions must reject unknown review IDs and preserve the record for valid decisions.
+bug-025 | bugfix | concurrency | Concurrent notification delivery must preserve every notification and mark only the target user read.

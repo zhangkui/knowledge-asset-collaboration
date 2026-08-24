@@ -1,3 +1,3 @@
 package regression
-
-func ScenarioBug004() string { return "bug-004-regression" }
+import("context";"sync";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/organization")
+func TestBug004MemberUpdates(t *testing.T){s:=organization.NewService();var wg sync.WaitGroup;for n:=0;n<20;n++{wg.Add(1);go func(n int){defer wg.Done();_,_=s.AddMember(context.Background(),"u"+string(rune(n+65)),"ws","workspace","editor")}(n)};wg.Wait();members,err:=s.ListMembers(context.Background(),"ws");if err!=nil||len(members)!=20{t.Fatalf("members=%d err=%v",len(members),err)}}

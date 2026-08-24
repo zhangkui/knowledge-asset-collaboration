@@ -1,3 +1,3 @@
 package regression
-
-func ScenarioBug003() string { return "bug-003-regression" }
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/search")
+func TestBug003EmptySearch(t *testing.T){i:=search.NewIndex();i.Add(search.Result{DocumentID:"d",Title:"Runbook",Snippet:"deploy"});if got:=i.Query(context.Background(),"");len(got)!=0{t.Fatalf("empty query returned %d",len(got))};if got:=i.Query(context.Background(),"deploy");len(got)!=1{t.Fatalf("normal query returned %d",len(got))}}

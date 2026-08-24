@@ -1,1 +1,6 @@
-import {createApp,ref} from 'vue'; import axios from 'axios'; import App from './App.vue'; axios.defaults.baseURL=import.meta.env.VITE_API_BASE||'http://localhost:8080'; createApp(App).mount('#app');
+﻿import { createApp } from "vue"
+import { createPinia } from "pinia"
+import ElementPlus from "element-plus"
+import "element-plus/dist/index.css"
+import App from "./App.vue"
+createApp(App).use(createPinia()).use(ElementPlus).mount("#app")

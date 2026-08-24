@@ -1,8 +1,15 @@
 {
   "project": "knowledge-asset-collaboration",
-  "bugs": 10,
-  "bugfix": 6,
-  "diagnosis": 4,
+  "bugs": 25,
+  "bugfix": 15,
+  "diagnosis": 10,
+  "categories": {
+    "concurrency": 5,
+    "nil": 4,
+    "slice": 5,
+    "error": 6,
+    "context": 5
+  },
   "generated_at": "2026-08-24",
   "remote_push": "blocked: repository not found / invalid credentials",
   "trajectory_urls": []
