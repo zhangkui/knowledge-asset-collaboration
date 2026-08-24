@@ -1,0 +1,28 @@
+Project: knowledge-asset-collaboration
+Title: Enterprise Knowledge Asset & Document Collaboration Platform
+Generated: 2026-08-24
+
+Bugs: 10 (bugfix=6, diagnosis=4)
+Categories: concurrency, nil, slice, error, context
+Go version: go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+Build validation: PASS - go test ./...
+Remote push: BLOCKED - GitHub returned Repository not found, token authentication returned invalid credentials
+Trajectory URLs: none (local backups retained under F:\go-bug-create\workspace\_trajectory_backup)
+
+Bug inventory:
+bug-001 | bugfix | context | Document creation must stop when the request context is cancelled. A client that disconnects while creating a document must not leave a document record behind.
+bug-002 | bugfix | nil | Publishing a document must require an approved review state and must return a business error for drafts.
+bug-003 | bugfix | slice | Search with an empty query must return no results instead of the entire index.
+bug-004 | bugfix | concurrency | Concurrent workspace member updates must not lose members when two requests add users at the same time.
+bug-005 | bugfix | error | Attachment completion must reject a second completion after the upload has already completed.
+bug-006 | bugfix | context | Expired or cancelled review decisions must not mutate review state.
+bug-007 | diagnosis | nil | Investigate why a malformed bearer token can access protected document APIs. The authorization layer must validate token structure, expiry, and signature before returning claims.
+bug-008 | diagnosis | concurrency | Investigate intermittent missing collaborators after simultaneous join and leave operations in the same editor room.
+bug-009 | diagnosis | slice | Investigate why moving a folder with a similarly prefixed ID is rejected even when it is not a descendant.
+bug-010 | diagnosis | error | Investigate why a failed notification read operation can be reported as successful after the request context is cancelled.
+
+Field validation: PASS
+
+Reports:
+F:\go-bug-create\workspace\knowledge-asset-collaboration\report-knowledge-asset-collaboration.txt
+F:\go-bug-create\workspace\knowledge-asset-collaboration\report-knowledge-asset-collaboration.xlsx
