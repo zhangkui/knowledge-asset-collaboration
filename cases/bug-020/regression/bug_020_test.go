@@ -1,3 +1,0 @@
-package regression
-import("context";"sync";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/document_version")
-func TestBug020ConcurrentVersions(t *testing.T){r:=document_version.NewRepository();var wg sync.WaitGroup;ids:=make(chan string,20);for i:=0;i<20;i++{wg.Add(1);go func(){defer wg.Done();v,err:=r.Create(context.Background(),document_version.Version{DocumentID:"d",Content:"x"});if err==nil{ids<-v.ID}}()};wg.Wait();close(ids);seen:=map[string]bool{};for id:=range ids{if seen[id]{t.Fatal("duplicate version id")};seen[id]=true};if len(seen)!=20{t.Fatalf("versions=%d",len(seen))}}

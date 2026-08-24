@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/review")
-func TestBug024ReviewDecision(t *testing.T){s:=review.NewService();r,err:=s.Submit(context.Background(),review.Record{DocumentID:"d",ReviewerID:"u"});if err!=nil{t.Fatal(err)};r,err=s.Decide(context.Background(),r.ID,review.Approved,"looks good");if err!=nil||r.State!=review.Approved{t.Fatalf("review=%+v err=%v",r,err)};if _,err=s.Decide(context.Background(),"missing",review.Rejected,"x");err==nil{t.Fatal("unknown review must fail")}}

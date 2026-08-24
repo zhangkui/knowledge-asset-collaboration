@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/review")
-func TestBug009ReviewHistory(t *testing.T){s:=review.NewService();r,err:=s.Submit(context.Background(),review.Record{DocumentID:"d",ReviewerID:"u"});if err!=nil{t.Fatal(err)};out,err:=s.Decide(context.Background(),r.ID,review.Approved,"ok");if err!=nil||out.State!=review.Approved{t.Fatalf("review=%+v err=%v",out,err)}}

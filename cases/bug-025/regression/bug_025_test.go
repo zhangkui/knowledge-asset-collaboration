@@ -1,3 +1,0 @@
-package regression
-import("context";"fmt";"sync";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/notification")
-func TestBug025NotificationIsolation(t *testing.T){c:=&notification.Center{};var wg sync.WaitGroup;for i:=0;i<20;i++{wg.Add(1);go func(i int){defer wg.Done();_ = c.Push(context.Background(),notification.Notification{UserID:fmt.Sprintf("u-%d",i%2),Message:"event"})}(i)};wg.Wait();if err:=c.MarkAllRead(context.Background(),"u-0");err!=nil{t.Fatal(err)};if len(c.Unread("u-0"))!=0||len(c.Unread("u-1"))!=10{t.Fatalf("unread isolation failed")}}

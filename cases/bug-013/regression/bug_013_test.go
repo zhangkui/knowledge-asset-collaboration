@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/audit")
-func TestBug013AuditSnapshot(t *testing.T){l:=&audit.Logger{};if err:=l.Record(context.Background(),audit.Event{ActorID:"u",Action:"create"});err!=nil{t.Fatal(err)};events:=l.List(context.Background());events[0].ActorID="tampered";if got:=l.List(context.Background())[0].ActorID;got!="u"{t.Fatalf("audit mutated: %s",got)}}

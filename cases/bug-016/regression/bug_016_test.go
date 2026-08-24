@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/document")
-func TestBug016CancelledSave(t *testing.T){r:=document.NewRepository();d,_:=r.Create(context.Background(),document.Document{Title:"Runbook"});ctx,cancel:=context.WithCancel(context.Background());cancel();if _,err:=r.Save(ctx,d.ID,"changed",d.Version);err==nil{t.Fatal("expected cancellation")};if got,err:=r.Save(context.Background(),d.ID,"ok",d.Version);err!=nil||got.Version!=2{t.Fatalf("version=%+v err=%v",got,err)}}

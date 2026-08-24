@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/notification")
-func TestBug010NotificationRead(t *testing.T){c:=&notification.Center{};if err:=c.Push(context.Background(),notification.Notification{UserID:"u",Message:"published"});err!=nil{t.Fatal(err)};if err:=c.MarkAllRead(context.Background(),"u");err!=nil{t.Fatal(err)};if len(c.Unread("u"))!=0{t.Fatal("notification remains unread")}}

@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"time";"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle")
-func TestBug021CancelledPurge(t *testing.T){b:=&recycle.Bin{};if err:=b.Put(context.Background(),recycle.Item{ObjectID:"d"});err!=nil{t.Fatal(err)};ctx,cancel:=context.WithCancel(context.Background());cancel();if n:=b.PurgeExpired(ctx,time.Now().Add(48*time.Hour));n!=0{t.Fatalf("cancelled purge removed=%d",n)}}

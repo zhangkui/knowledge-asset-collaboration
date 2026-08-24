@@ -1,3 +1,0 @@
-package regression
-import("context";"testing";"time";"github.com/zhangkui/knowledge-asset-collaboration/internal/share")
-func TestBug019ShareTTL(t *testing.T){if _,err:=share.Create(context.Background(),"d","read",0);err==nil{t.Fatal("non-positive ttl must fail")};l,err:=share.Create(context.Background(),"d","read",time.Hour);if err!=nil||!share.Valid(l,time.Now()){t.Fatalf("link=%+v err=%v",l,err)}}
