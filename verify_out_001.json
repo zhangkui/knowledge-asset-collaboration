@@ -1,0 +1,12 @@
+{
+  "post_fix": {
+    "trajectory": "C:\\Users\\团子\\.claude\\projects\\F--go-bug-create-workspace-knowledge-asset-collaboration-knowledge-asset-collaboration-bug-001-green\\82bfbabe-8f05-492a-8dd2-598ebd9fa8f4.jsonl",
+    "session_id": "82bfbabe-8f05-492a-8dd2-598ebd9fa8f4",
+    "result": "green"
+  },
+  "pre_fix": {
+    "trajectory": "C:\\Users\\团子\\.claude\\projects\\F--go-bug-create-workspace-knowledge-asset-collaboration-knowledge-asset-collaboration-bug-001-green\\38e5fbcb-6829-4cfb-9dc2-c19b28ebe20b.jsonl",
+    "session_id": "38e5fbcb-6829-4cfb-9dc2-c19b28ebe20b",
+    "result": "red"
+  }
+}

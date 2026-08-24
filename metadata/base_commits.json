@@ -1,0 +1,6 @@
+{
+  "branch_model": "orphan-redgreen",
+  "bugs": {
+    "1": {"green_branch": "bug1_green", "red_branch": "bug1_red", "g1_sha": "2b188c3"}
+  }
+}

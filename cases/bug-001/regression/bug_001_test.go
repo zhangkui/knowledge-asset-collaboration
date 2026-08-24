@@ -1,3 +1,32 @@
 package regression
-import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/document")
-func TestBug001DocumentContext(t *testing.T){r:=document.NewRepository();ctx,cancel:=context.WithCancel(context.Background());cancel();if _,err:=r.Create(ctx,document.Document{Title:"cancelled"});err==nil{t.Fatal("cancelled create must fail")};d,err:=r.Create(context.Background(),document.Document{Title:"valid"});if err!=nil||d.ID==""{t.Fatalf("document=%+v err=%v",d,err)}}
+
+import (
+	"context"
+	"sync/atomic"
+	"testing"
+
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/document"
+)
+
+type cancelAfterFirstCheck struct {
+	context.Context
+	checks atomic.Int32
+}
+
+func (c *cancelAfterFirstCheck) Err() error {
+	if c.checks.Add(1) == 1 {
+		return nil
+	}
+	return context.Canceled
+}
+
+func TestBug001DocumentContext(t *testing.T) {
+	r := document.NewRepository()
+	ctx := &cancelAfterFirstCheck{Context: context.Background()}
+	if _, err := r.Create(ctx, document.Document{Title: "cancelled"}); err == nil {
+		t.Fatal("cancellation after validation must prevent persistence")
+	}
+	if _, err := r.Create(context.Background(), document.Document{Title: "valid"}); err != nil {
+		t.Fatalf("valid create failed: %v", err)
+	}
+}

@@ -1,14 +1,16 @@
 Project: knowledge-asset-collaboration
 Title: Enterprise Knowledge Asset & Document Collaboration Platform
 Generated: 2026-08-24
-
 Bugs: 25 (bugfix=15, diagnosis=10)
-Categories: {'concurrency': 5, 'nil': 4, 'slice': 5, 'error': 6, 'context': 5}
+Categories: {'context': 5, 'nil': 4, 'slice': 5, 'concurrency': 5, 'error': 6}
 Go version: go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
-Production Go lines: 5067
+Production Go lines: 5264
 Internal package validation: PASS - go test ./internal/...
-Regression validation: 4 intentional red cases currently expose defects in bug-003, bug-017, bug-019, bug-020; remaining cases execute business assertions.
-Remote push: BLOCKED - GitHub returned Repository not found, token authentication returned invalid credentials
+Static validation: PASS - go vet ./internal/...; gofmt clean
+Frontend validation: PASS - npm run build in web/
+Regression validation: 4 intentional red cases expose defects in bug-003, bug-017, bug-019, bug-020; 21 cases pass.
+Remote validation: PASS - 25 cases on master, 25 red branches, 25 green branches, 25 distinct branch-tip pairs
+Latest master commit: 3b675dd chore: track bug packets
 GitHub repository: https://github.com/zhangkui/knowledge-asset-collaboration
 Trajectory index: https://github.com/zhangkui/knowledge-asset-collaboration/tree/master/trajectory-backup
 Local trajectory backups: F:\go-bug-create\workspace\_trajectory_backup
