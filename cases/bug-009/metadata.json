@@ -9,5 +9,6 @@
   "verify_cmds": [
     "go test ./...",
     "go test -race ./internal/..."
-  ]
+  ],
+  "production_symbol": "internal/folder/service.go:CanMove"
 }
