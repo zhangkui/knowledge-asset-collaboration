@@ -1,0 +1,30 @@
+# Bug 016
+
+## user_query
+Saving a document after request cancellation must return the cancellation error and keep the previous version.
+
+## bug_category
+context
+
+## mode
+bugfix
+
+## production_symbol
+internal/document.Repository.Save
+
+## gold_root_cause
+中文根因：文档草稿保存需要在写锁前后都尊重请求取消。生产文件/符号：internal/document/repository.go:Repository.Save。失效原因：取消请求仍推进版本会让编辑器发生不可恢复的版本冲突。证据：Save 使用 expected version并更新 Body、Version。 生产文件/符号：internal/document.Repository.Save 调用链：HTTP/业务服务 → internal/document.Repository.Save。失效原因：取消请求仍推进版本会让编辑器发生不可恢复的版本冲突。证据：Save 使用 expected version并更新 Body、Version。 证据：Save 使用 expected version并更新 Body、Version。
+
+## success_criteria
+目标行为：取消保存不改变正文和版本。边界：取消前的有效保存仍可成功；错误版本返回乐观锁冲突。合法场景：版本号匹配且上下文有效时保存成功。验证标准：取消调用返回 context.Canceled，随后读取仍为原版本。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## verify_cmds
+- go test ./cases/bug-016/regression -count=1
+- go test -race ./cases/bug-016/regression -count=10
+
+## branches
+- green: bug016_green
+- red: bug016_red

@@ -1,0 +1,3 @@
+package regression
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/workspace")
+func TestBug017NilWorkspaceContext(t *testing.T){defer func(){if recover()!=nil{t.Fatal("nil context must not panic")}}();_,err:=workspace.Create(nil,"Engineering","u");if err==nil{t.Fatal("expected nil context error")};w,err:=workspace.Create(context.Background(),"Engineering","u");if err!=nil||w.ID==""{t.Fatalf("workspace=%+v err=%v",w,err)}}

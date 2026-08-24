@@ -1,0 +1,13 @@
+{
+  "bug_id": "023",
+  "mode": "diagnosis",
+  "category": "slice",
+  "user_query": "Folder move validation must reject moving a folder into itself or any descendant.",
+  "gold_root_cause": "中文根因：文件夹移动需要阻止环形父子关系。生产文件/符号：internal/folder/folder.go:CanMove。失效原因：形成循环后树遍历和权限继承会无限递归。证据：CanMove同时检查自身 ID和子路径前缀。 生产文件/符号：internal/folder.CanMove 调用链：HTTP/业务服务 → internal/folder.CanMove。失效原因：形成循环后树遍历和权限继承会无限递归。证据：CanMove同时检查自身 ID和子路径前缀。 证据：CanMove同时检查自身 ID和子路径前缀。",
+  "success_criteria": "目标行为：自身和子孙目标均拒绝，其他目标允许。边界：空 ID不允许；同级兄弟目录可移动。合法场景：移动到根目录或其他分支。验证标准：布尔结果覆盖自身、子孙、合法目标和空值。",
+  "go_version": "go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)",
+  "verify_cmds": [
+    "go test ./cases/bug-023/regression -count=1",
+    "go test -race ./cases/bug-023/regression -count=10"
+  ]
+}

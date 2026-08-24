@@ -1,0 +1,30 @@
+# Bug 017
+
+## user_query
+Workspace creation must reject a nil context instead of panicking.
+
+## bug_category
+nil
+
+## mode
+bugfix
+
+## production_symbol
+internal/workspace.Create
+
+## gold_root_cause
+中文根因：公共服务方法必须把 nil context 视为无效请求。生产文件/符号：internal/workspace/workspace.go:Create。失效原因：后台任务传入 nil 会触发 ctx.Err() 空指针崩溃。证据：Create 直接访问 ctx.Err。 生产文件/符号：internal/workspace.Create 调用链：HTTP/业务服务 → internal/workspace.Create。失效原因：后台任务传入 nil 会触发 ctx.Err() 空指针崩溃。证据：Create 直接访问 ctx.Err。 证据：Create 直接访问 ctx.Err。
+
+## success_criteria
+目标行为：nil context返回错误而不 panic。边界：已取消 context同样返回取消错误。合法场景：context.Background可创建非空名称空间。验证标准：测试使用 recover 确认无 panic，并校验有效调用返回 workspace ID。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## verify_cmds
+- go test ./cases/bug-017/regression -count=1
+- go test -race ./cases/bug-017/regression -count=10
+
+## branches
+- green: bug017_green
+- red: bug017_red

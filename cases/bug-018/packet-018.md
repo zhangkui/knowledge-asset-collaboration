@@ -1,0 +1,30 @@
+# Bug 018
+
+## user_query
+Permission evaluation must honor an explicit deny even when a broader allow grant exists.
+
+## bug_category
+slice
+
+## mode
+diagnosis
+
+## production_symbol
+internal/permission.Service.Allowed
+
+## gold_root_cause
+中文根因：权限决策需要按显式拒绝优先于继承允许。生产文件/符号：internal/permission/service.go:Service.Allowed。失效原因：同一用户既有全局允许又有文档拒绝时，若顺序依赖会越权。证据：Allowed遍历 grants并处理 ExplicitDeny。 生产文件/符号：internal/permission.Service.Allowed 调用链：HTTP/业务服务 → internal/permission.Service.Allowed。失效原因：同一用户既有全局允许又有文档拒绝时，若顺序依赖会越权。证据：Allowed遍历 grants并处理 ExplicitDeny。 证据：Allowed遍历 grants并处理 ExplicitDeny。
+
+## success_criteria
+目标行为：显式拒绝始终优先。边界：仅有允许时返回 true，仅有拒绝时返回 false。合法场景：用户拥有空间继承允许但文档显式拒绝。验证标准：不同 grant 添加顺序得到相同拒绝结果。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## verify_cmds
+- go test ./cases/bug-018/regression -count=1
+- go test -race ./cases/bug-018/regression -count=10
+
+## branches
+- green: bug018_green
+- red: bug018_red

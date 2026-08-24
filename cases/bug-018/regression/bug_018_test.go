@@ -1,0 +1,3 @@
+package regression
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/permission")
+func TestBug018ExplicitDeny(t *testing.T){s:=&permission.Service{};ctx:=context.Background();_ = s.Grant(ctx,permission.Grant{SubjectID:"u",ResourceID:"*",Permission:"read"});_ = s.Grant(ctx,permission.Grant{SubjectID:"u",ResourceID:"doc",Permission:"read",ExplicitDeny:true});if s.Allowed(ctx,"u","doc","read"){t.Fatal("explicit deny must win")}}

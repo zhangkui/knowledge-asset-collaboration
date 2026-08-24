@@ -1,0 +1,3 @@
+package regression
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/comment")
+func TestBug014CommentResolution(t *testing.T){r:=comment.NewRepository();c,err:=r.Add(context.Background(),comment.Comment{DocumentID:"d",Body:"review"});if err!=nil{t.Fatal(err)};if err:=r.Resolve(context.Background(),c.ID,true);err!=nil{t.Fatal(err)};if err:=r.Resolve(context.Background(),"missing",true);err==nil{t.Fatal("unknown comment must fail")}}

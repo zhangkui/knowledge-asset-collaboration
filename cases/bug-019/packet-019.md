@@ -1,0 +1,30 @@
+# Bug 019
+
+## user_query
+Creating a share link with a non-positive TTL must return a validation error.
+
+## bug_category
+error
+
+## mode
+bugfix
+
+## production_symbol
+internal/share.Create
+
+## gold_root_cause
+中文根因：公开分享必须限制有效期，不能创建立即过期或永久无期限链接。生产文件/符号：internal/share/share.go:Create。失效原因：非正 TTL 会生成不可用分享或绕过平台的过期策略。证据：Create 根据 ttl 计算 ExpiresAt。 生产文件/符号：internal/share.Create 调用链：HTTP/业务服务 → internal/share.Create。失效原因：非正 TTL 会生成不可用分享或绕过平台的过期策略。证据：Create 根据 ttl 计算 ExpiresAt。 证据：Create 根据 ttl 计算 ExpiresAt。
+
+## success_criteria
+目标行为：ttl<=0 返回错误。边界：最小正 TTL可创建，过期后 Valid为false。合法场景：小时级或天级链接可访问。验证标准：无效参数错误非 nil，合法链接 Token 非空且未立即过期。
+
+## go_version
+go1.26.1 windows/amd64 (GOTOOLCHAIN=auto)
+
+## verify_cmds
+- go test ./cases/bug-019/regression -count=1
+- go test -race ./cases/bug-019/regression -count=10
+
+## branches
+- green: bug019_green
+- red: bug019_red

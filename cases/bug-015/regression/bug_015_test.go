@@ -1,0 +1,3 @@
+package regression
+import("context";"fmt";"sync";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/editor")
+func TestBug015PresenceConcurrency(t *testing.T){h:=editor.NewHub();var wg sync.WaitGroup;for i:=0;i<20;i++{wg.Add(1);go func(i int){defer wg.Done();_ = h.Join(context.Background(),"d",editor.Presence{UserID:fmt.Sprintf("u-%d",i),DocumentID:"d"})}(i)};wg.Wait();if got:=len(h.Online("d"));got!=20{t.Fatalf("online=%d",got)}}

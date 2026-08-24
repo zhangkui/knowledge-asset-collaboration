@@ -1,0 +1,3 @@
+package regression
+import("context";"testing";"github.com/zhangkui/knowledge-asset-collaboration/internal/attachment")
+func TestBug012AttachmentCompletion(t *testing.T){s:=attachment.NewService();a,err:=s.Start(context.Background(),attachment.Attachment{DocumentID:"d",Name:"a.txt",Size:4});if err!=nil{t.Fatal(err)};done,err:=s.Complete(context.Background(),a.ID);if err!=nil||done.Uploaded!=4{t.Fatalf("completion=%+v err=%v",done,err)};if _,err=s.Complete(context.Background(),"missing");err==nil{t.Fatal("missing attachment must fail")}}
