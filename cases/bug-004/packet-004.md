@@ -1,7 +1,7 @@
 # Bug 004
 
 ## user_query
-Concurrent workspace member updates must not lose members when two requests add users at the same time.
+Concurrent team member updates must not lose members when two requests add users at the same time.
 
 ## bug_category
 concurrency
