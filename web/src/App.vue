@@ -1,0 +1,1 @@
+<template><main><h1>Knowledge Asset Collaboration</h1><button @click="load">Load documents</button><pre>{{ JSON.stringify(items,null,2) }}</pre></main></template><script setup lang="ts">import {ref} from 'vue';import axios from 'axios';const items=ref<unknown[]>([]);async function load(){const {data}=await axios.get('/api/v1/documents');items.value=data.items||[]}</script>

@@ -1,0 +1,1 @@
+import {createApp,ref} from 'vue'; import axios from 'axios'; import App from './App.vue'; axios.defaults.baseURL=import.meta.env.VITE_API_BASE||'http://localhost:8080'; createApp(App).mount('#app');

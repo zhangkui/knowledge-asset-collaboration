@@ -1,0 +1,1 @@
+{"scripts":{"dev":"vite","build":"vite build"},"dependencies":{"axios":"latest","vite":"latest","vue":"latest","typescript":"latest"}}
