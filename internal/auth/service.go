@@ -18,6 +18,10 @@ type Claims struct {
 	ExpiresAt time.Time
 	IssuedAt  time.Time
 }
+
+// ErrMissingAuthorization is returned when a request carries no Authorization header.
+var ErrMissingAuthorization = errors.New("missing authorization header")
+
 type Service struct {
 	Secret     []byte
 	AccessTTL  time.Duration
@@ -75,7 +79,11 @@ func (s Service) Parse(token string) (Claims, error) {
 	return claims, nil
 }
 func (s Service) Authorize(r *http.Request) (Claims, error) {
-	raw := r.Header.Values("Authorization")[0]
+	values := r.Header.Values("Authorization")
+	if len(values) == 0 {
+		return Claims{}, ErrMissingAuthorization
+	}
+	raw := values[0]
 	if !strings.HasPrefix(raw, "Bearer ") {
 		return Claims{}, errors.New("missing bearer token")
 	}
