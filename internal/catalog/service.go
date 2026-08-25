@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/permission"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/review"
 )
 
 type WorkspaceVisibility string
@@ -487,7 +488,7 @@ func (s *Service) DecideReview(ctx context.Context, actorID, id, state, opinion 
 	if err := checkContext(ctx); err != nil {
 		return Review{}, err
 	}
-	if state != "approved" && state != "rejected" && state != "returned" {
+	if !review.ValidState(review.State(state)) {
 		return Review{}, errors.New("invalid review state")
 	}
 	s.mu.Lock()

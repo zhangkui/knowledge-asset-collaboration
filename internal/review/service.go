@@ -28,6 +28,9 @@ type Service struct {
 }
 
 func NewService() *Service { return &Service{records: map[string]Record{}} }
+func ValidState(state State) bool {
+	return state == Approved || state == Rejected || state == Returned || state == Cancelled
+}
 func (s *Service) Submit(ctx context.Context, r Record) (Record, error) {
 	if err := ctx.Err(); err != nil {
 		return Record{}, err
