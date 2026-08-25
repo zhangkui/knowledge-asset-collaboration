@@ -30,6 +30,7 @@ type App struct {
 	Catalog            *catalog.Service
 	Uploads            *attachment.Manager
 	Auth               auth.Service
+	SessionStore       *auth.SessionStore
 	NotificationCenter *notification.Center
 	Directory          *user.Directory
 	Store              *postgres.Store
@@ -128,6 +129,10 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, map[string]any{"access_token": access, "refresh_token": refresh, "token_type": "Bearer", "expires_in": int(a.Auth.AccessTTL.Seconds())})
 }
+func (a *App) RefreshSession(ctx context.Context, sessionID string) (auth.Session, error) {
+	return a.SessionStore.Touch(ctx, sessionID)
+}
+
 func (a *App) refresh(w http.ResponseWriter, r *http.Request) {
 	var in struct {
 		RefreshToken string `json:"refresh_token"`
