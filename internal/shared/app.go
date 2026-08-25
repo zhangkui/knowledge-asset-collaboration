@@ -16,23 +16,29 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/auth"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
 )
 
 type App struct {
 	Catalog   *catalog.Service
 	Auth      auth.Service
 	NotificationCenter *notification.Center
+	Directory *user.Directory
 	StartedAt time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
 			a.NotificationCenter = notification.NewCenter()
 	}
 	return a.NotificationCenter.Push(ctx, n)
+}
+
+func (a *App) RolesForUser(ctx context.Context, userID string) ([]user.Role, error) {
+	return a.Directory.RolesForUser(ctx, userID)
 }
 
 func (a *App) Router() http.Handler {
