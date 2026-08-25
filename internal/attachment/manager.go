@@ -104,7 +104,7 @@ func (m *Manager) Get(ctx context.Context, id string) (Upload, error) {
 	if !ok {
 		return Upload{}, errors.New("upload not found")
 	}
-	u.Chunks = u.Chunks
+	u.Chunks = copyChunks(u.Chunks)
 	return u, nil
 }
 func copyChunks(src map[int]Chunk) map[int]Chunk {
