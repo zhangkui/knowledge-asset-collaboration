@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/permission"
 )
 
 type WorkspaceVisibility string
@@ -158,25 +160,26 @@ type Report struct {
 }
 
 type Service struct {
-	mu            sync.RWMutex
-	workspaces    map[string]Workspace
-	folders       map[string]Folder
-	documents     map[string]Document
-	versions      map[string]Version
-	comments      map[string]Comment
-	reviews       map[string]Review
-	grants        []PermissionGrant
-	tags          map[string]Tag
-	documentTags  map[string]map[string]bool
-	shares        map[string]Share
-	notifications map[string]Notification
-	audit         []AuditLog
-	recent        map[string][]string
-	recycle       map[string]RecycleItem
-	annotations   map[string]Annotation
-	attachments   map[string]Attachment
-	reads         map[string]int
-	next          uint64
+	mu             sync.RWMutex
+	workspaces     map[string]Workspace
+	folders        map[string]Folder
+	documents      map[string]Document
+	versions       map[string]Version
+	comments       map[string]Comment
+	reviews        map[string]Review
+	grants         []PermissionGrant
+	tags           map[string]Tag
+	documentTags   map[string]map[string]bool
+	shares         map[string]Share
+	notifications  map[string]Notification
+	audit          []AuditLog
+	recent         map[string][]string
+	recycle        map[string]RecycleItem
+	annotations    map[string]Annotation
+	attachments    map[string]Attachment
+	reads          map[string]int
+	permissionGate *permission.Service
+	next           uint64
 }
 
 func NewService() *Service {
@@ -419,6 +422,12 @@ func (s *Service) GetDocument(ctx context.Context, id string) (Document, error) 
 	}
 	return d, nil
 }
+func (s *Service) SetPermissionGate(gate *permission.Service) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.permissionGate = gate
+}
+
 func (s *Service) SaveDraft(ctx context.Context, actorID, id, body string, expectedVersion int64) (Document, error) {
 	if err := checkContext(ctx); err != nil {
 		return Document{}, err
@@ -429,7 +438,11 @@ func (s *Service) SaveDraft(ctx context.Context, actorID, id, body string, expec
 	if !ok {
 		return Document{}, errors.New("document not found")
 	}
-	if !s.canEditLocked(actorID, d) {
+	editable := s.canEditLocked(actorID, d)
+	if !editable && s.permissionGate != nil {
+		editable = s.permissionGate.Allowed(ctx, actorID, d.ID, "edit") || s.permissionGate.Allowed(ctx, actorID, d.WorkspaceID, "edit")
+	}
+	if !editable {
 		return Document{}, errors.New("document edit permission required")
 	}
 	if expectedVersion != d.Version {
