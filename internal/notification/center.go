@@ -11,6 +11,10 @@ type Notification struct {
 	Read                      bool
 	CreatedAt                 time.Time
 }
+func NewCenter() *Center {
+	return &Center{}
+}
+
 type Center struct {
 	mu    sync.RWMutex
 	items []Notification

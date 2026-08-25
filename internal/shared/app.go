@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
@@ -14,17 +15,26 @@ import (
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/auth"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 )
 
 type App struct {
 	Catalog   *catalog.Service
 	Auth      auth.Service
+	NotificationCenter *notification.Center
 	StartedAt time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), StartedAt: time.Now()}
 }
+func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
+	if a.NotificationCenter == nil {
+			a.NotificationCenter = notification.NewCenter()
+	}
+	return a.NotificationCenter.Push(ctx, n)
+}
+
 func (a *App) Router() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", a.health)
