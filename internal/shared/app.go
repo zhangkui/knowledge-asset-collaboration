@@ -75,10 +75,13 @@ func (a *App) PublishDocument(ctx context.Context, actorID, documentID string) (
 func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
 	link, err := a.Shares.Lookup(ctx, token)
 	if err != nil {
-		link = nil
+		return share.Link{}, fmt.Errorf("open share: %w", err)
+	}
+	if link == nil {
+		return share.Link{}, fmt.Errorf("open share: %w", share.ErrShareNotFound)
 	}
 	if !share.Valid(*link, time.Now()) {
-		return share.Link{}, errors.New("share expired")
+		return share.Link{}, fmt.Errorf("open share: %w", share.ErrShareExpired)
 	}
 	return *link, nil
 }

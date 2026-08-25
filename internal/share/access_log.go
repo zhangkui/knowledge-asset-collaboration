@@ -32,7 +32,7 @@ func (r *Registry) Add(ctx context.Context, link Link) error {
 		return err
 	}
 	if link.Token == "" || link.DocumentID == "" {
-		return errors.New("invalid share link")
+		return ErrInvalidShareLink
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -49,7 +49,7 @@ func (r *Registry) Revoke(ctx context.Context, token string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if _, ok := r.links[token]; !ok {
-		return errors.New("share not found")
+		return ErrShareNotFound
 	}
 	r.revoked[token] = time.Now()
 	return nil
@@ -65,7 +65,7 @@ func (r *Registry) Lookup(ctx context.Context, token string) (*Link, error) {
 	defer r.mu.RUnlock()
 	link, ok := r.links[token]
 	if !ok {
-		return nil, errors.New("share not found")
+		return nil, ErrShareNotFound
 	}
 	copy := link
 	return &copy, nil
@@ -84,17 +84,17 @@ func (r *Registry) Open(ctx context.Context, token, visitor, ip, agent string) (
 	if !ok {
 		access.Reason = "share not found"
 		r.accesses = append(r.accesses, access)
-		return Link{}, access, errors.New("share not found")
+		return Link{}, access, ErrShareNotFound
 	}
 	if _, revoked := r.revoked[token]; revoked {
 		access.Reason = "share revoked"
 		r.accesses = append(r.accesses, access)
-		return Link{}, access, errors.New("share revoked")
+		return Link{}, access, ErrShareRevoked
 	}
 	if !Valid(link, time.Now()) {
 		access.Reason = "share expired"
 		r.accesses = append(r.accesses, access)
-		return Link{}, access, errors.New("share expired")
+		return Link{}, access, ErrShareExpired
 	}
 	access.Allowed = true
 	r.accesses = append(r.accesses, access)

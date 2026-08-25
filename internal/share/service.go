@@ -4,8 +4,26 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
+)
+
+// Sentinel errors for share resolution. Callers should inspect them with
+// errors.Is so the failure cause survives wrapping (no %v that breaks the
+// chain).
+var (
+	// ErrShareNotFound is returned when a share token does not exist (for
+	// example an empty link or an unknown token).
+	ErrShareNotFound = errors.New("share not found")
+	// ErrShareExpired is returned when a share token exists but is past its
+	// expiry.
+	ErrShareExpired = errors.New("share expired")
+	// ErrShareRevoked is returned when a share token has been revoked.
+	ErrShareRevoked = errors.New("share revoked")
+	// ErrInvalidShareLink is returned when a share link is structurally
+	// invalid (missing token or document).
+	ErrInvalidShareLink = errors.New("invalid share link")
 )
 
 type Link struct {
