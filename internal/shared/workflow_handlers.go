@@ -49,9 +49,10 @@ func (a *App) reports(w http.ResponseWriter, r *http.Request, user string) {
 			writeDomainError(w, err)
 			return
 		}
-		dashboard = a.ReportAggregator.CloneDashboard(dashboard)
-		if limit, err := strconv.Atoi(r.URL.Query().Get("top_limit")); err == nil && limit > 0 && limit < len(dashboard.TopDocuments) {
-			dashboard.TopDocuments = dashboard.TopDocuments[:limit]
+		if limit, err := strconv.Atoi(r.URL.Query().Get("top_limit")); err == nil && limit > 0 {
+			dashboard = a.ReportAggregator.LimitTopDocuments(dashboard, limit)
+		} else {
+			dashboard = a.ReportAggregator.CloneDashboard(dashboard)
 		}
 		writeJSON(w, 200, dashboard)
 		return

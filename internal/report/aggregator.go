@@ -162,6 +162,13 @@ func (a *Aggregator) CloneDashboard(in Dashboard) Dashboard {
 	out.TopUsers = append([]Ranking(nil), in.TopUsers...)
 	return out
 }
+func (a *Aggregator) LimitTopDocuments(in Dashboard, limit int) Dashboard {
+	out := a.CloneDashboard(in)
+	if limit > 0 && limit < len(out.TopDocuments) {
+		out.TopDocuments = out.TopDocuments[:limit]
+	}
+	return out
+}
 func (a *Aggregator) Reset(ctx context.Context, workspace string) error {
 	if ctx == nil {
 		return errors.New("context is nil")
