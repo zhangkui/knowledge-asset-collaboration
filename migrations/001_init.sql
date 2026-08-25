@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS users (id text primary key, email text unique not null, name text not null, enabled boolean not null default true, created_at timestamptz not null default now());
+CREATE TABLE IF NOT EXISTS workspaces (id text primary key, name text not null, visibility text not null, status text not null, owner_id text not null, created_at timestamptz not null default now());
+CREATE TABLE IF NOT EXISTS folders (id text primary key, workspace_id text not null, parent_id text, name text not null, created_at timestamptz not null default now());
+CREATE TABLE IF NOT EXISTS documents (id text primary key, workspace_id text not null, folder_id text, title text not null, body text not null default '', status text not null, version bigint not null default 1, author_id text not null, updated_at timestamptz not null default now());
+CREATE TABLE IF NOT EXISTS document_versions (id text primary key, document_id text not null, number bigint not null, content text not null, summary text, author_id text not null, created_at timestamptz not null default now());
+CREATE TABLE IF NOT EXISTS audit_logs (id text primary key, actor_id text not null, action text not null, object_type text not null, object_id text not null, created_at timestamptz not null default now());
