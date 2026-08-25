@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-NAME="$1"
-PLATFORM="$2"
-IMAGE="benzhi/${NAME}:latest"
-docker build --platform "$PLATFORM" -f benzhi.Dockerfile -t "$IMAGE" .
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+image="${1:-benzhi/community-tool-locker:latest}"
+platform="${2:-linux/amd64}"
+
+docker build \
+  --platform "$platform" \
+  --file "$script_dir/benzhi.Dockerfile" \
+  --tag "$image" \
+  "$script_dir"
+
+printf 'Built image: %s (%s)\n' "$image" "$platform"
