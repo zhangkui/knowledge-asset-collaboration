@@ -54,6 +54,22 @@ func (r *Registry) Revoke(ctx context.Context, token string) error {
 	r.revoked[token] = time.Now()
 	return nil
 }
+func (r *Registry) Lookup(ctx context.Context, token string) (*Link, error) {
+	if ctx == nil {
+		return nil, errors.New("context is nil")
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	link, ok := r.links[token]
+	if !ok {
+		return nil, errors.New("share not found")
+	}
+	copy := link
+	return &copy, nil
+}
 func (r *Registry) Open(ctx context.Context, token, visitor, ip, agent string) (Link, Access, error) {
 	if ctx == nil {
 		return Link{}, Access{}, errors.New("context is nil")

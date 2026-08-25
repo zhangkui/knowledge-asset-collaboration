@@ -18,6 +18,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/share"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
 )
 
@@ -28,11 +29,12 @@ type App struct {
 	Directory *user.Directory
 	Store *postgres.Store
 	Publisher publish.Service
+	Shares *share.Registry
 	StartedAt time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -59,6 +61,17 @@ func (a *App) PublishDocument(ctx context.Context, actorID, documentID string) (
 	return a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished)
 }
 
+
+func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
+	link, err := a.Shares.Lookup(ctx, token)
+	if err != nil {
+		return share.Link{}, err
+	}
+	if !share.Valid(*link, time.Now()) {
+		return share.Link{}, errors.New("share expired")
+	}
+	return *link, nil
+}
 
 func (a *App) Router() http.Handler {
 	mux := http.NewServeMux()
