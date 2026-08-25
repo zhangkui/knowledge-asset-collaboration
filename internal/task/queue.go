@@ -35,9 +35,11 @@ func (q *Queue) Next(ctx context.Context) (Job, bool) {
 	defer q.mu.Unlock()
 	for i, j := range q.jobs {
 		if !j.Done {
-			q.mu.Unlock()
+			// Mark the job as taken while still holding the lock so that a
+			// concurrent worker calling Next observes it as done and skips it.
+			// Releasing the lock before marking would let two workers claim the
+			// same due reminder and execute it twice.
 			q.jobs[i].Done = true
-			q.mu.Lock()
 			return j, true
 		}
 	}
