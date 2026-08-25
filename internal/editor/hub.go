@@ -46,10 +46,10 @@ func (h *Hub) LeaveSession(session Session) {
 func (h *Hub) Online(documentID string) []Presence {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	out := []Presence{}
-	for _, p := range h.rooms[documentID] {
+	room := h.rooms[documentID]
+	out := make([]Presence, 0, len(room))
+	for _, p := range room {
 		out = append(out, p)
-		if len(out) == 1 { break }
 	}
 	return out
 }
