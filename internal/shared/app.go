@@ -64,15 +64,24 @@ func (a *App) RunTransaction(ctx context.Context, fn func(context.Context) error
 func (a *App) PublishDocument(ctx context.Context, actorID, documentID string) (catalog.Document, error) {
 	document, err := a.Catalog.GetDocument(ctx, documentID)
 	if err != nil {
-		return catalog.Document{}, err
+		return catalog.Document{}, fmt.Errorf("publish document: %w", err)
 	}
-	if _, err := a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished); err != nil {
-		return catalog.Document{}, err
-	}
+	// Validate approval before mutating any state. A document that has not
+	// been approved must never reach the published state, and a failure here
+	// must leave the document in its draft state rather than a half-published one.
 	if _, err := a.Publisher.Publish(ctx, string(document.Status)); err != nil {
-		return catalog.Document{}, err
+		return catalog.Document{}, fmt.Errorf("publish document: %w", err)
 	}
-	return a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished)
+	published, err := a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished)
+	if err != nil {
+		// Publishing was approved but the status transition failed. Restore the
+		// draft state so no half-finished published document is left behind.
+		if _, revertErr := a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentDraft); revertErr != nil {
+			return catalog.Document{}, fmt.Errorf("publish document: %w (revert failed: %v)", err, revertErr)
+		}
+		return catalog.Document{}, fmt.Errorf("publish document: %w", err)
+	}
+	return published, nil
 }
 
 func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
@@ -736,6 +745,9 @@ func writeDomainError(w http.ResponseWriter, err error) {
 	}
 	if errors.Is(err, contextCanceled) {
 		status = 499
+	}
+	if errors.Is(err, publish.ErrNotApproved) {
+		status = 409
 	}
 	writeError(w, status, err.Error())
 }
