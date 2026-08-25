@@ -39,6 +39,10 @@ func (h *Hub) Leave(documentID, userID string) {
 		}
 	}
 }
+func (h *Hub) LeaveSession(session Session) {
+	h.Leave(session.DocumentID, session.UserID)
+}
+
 func (h *Hub) Online(documentID string) []Presence {
 	h.mu.RLock()
 	defer h.mu.RUnlock()

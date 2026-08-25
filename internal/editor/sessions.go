@@ -98,6 +98,9 @@ func (s *SessionManager) Heartbeat(ctx context.Context, id string) (Session, err
 	if !ok {
 		return Session{}, errors.New("session not found")
 	}
+	if !session.Active {
+		return Session{}, errors.New("session disconnected")
+	}
 	session.LastSeen = time.Now()
 	session.Active = true
 	s.sessions[id] = session
@@ -120,6 +123,29 @@ func (s *SessionManager) Disconnect(ctx context.Context, id string) error {
 	s.sessions[id] = session
 	return nil
 }
+func (s *SessionManager) DisconnectFromHub(ctx context.Context, hub *Hub, id string) error {
+	if hub == nil {
+		return errors.New("editor hub is required")
+	}
+	if ctx == nil {
+		return errors.New("context is nil")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	session, ok := s.sessions[id]
+	if !ok {
+		s.mu.Unlock()
+		return errors.New("session not found")
+	}
+	session.Active = false
+	s.sessions[id] = session
+	s.mu.Unlock()
+	hub.LeaveSession(session)
+	return nil
+}
+
 func (s *SessionManager) Presence(ctx context.Context, doc string) ([]Session, error) {
 	if ctx == nil {
 		return nil, errors.New("context is nil")
