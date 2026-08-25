@@ -7,9 +7,14 @@ import (
 	"strconv"
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
 )
 
 func (a *App) recycle(w http.ResponseWriter, r *http.Request, user, id string) {
+	if r.Method == http.MethodPut {
+		a.recyclePut(w, r, user)
+		return
+	}
 	if r.Method == http.MethodGet {
 		items, err := a.Catalog.ListRecycle(r.Context(), user)
 		if err != nil {
@@ -127,3 +132,16 @@ func (a *App) uploadState(w http.ResponseWriter, r *http.Request, user, id strin
 }
 
 var _ attachment.Chunk
+
+func (a *App) recyclePut(w http.ResponseWriter, r *http.Request, user string) {
+	var item recycle.Item
+	if err := decode(r, &item); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid recycle item")
+		return
+	}
+	if err := a.PutRecycleItem(r.Context(), item); err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}

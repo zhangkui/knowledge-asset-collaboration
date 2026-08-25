@@ -2,6 +2,7 @@ package recycle
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 )
@@ -16,6 +17,9 @@ type Bin struct {
 }
 
 func (b *Bin) Put(ctx context.Context, i Item) error {
+	if ctx == nil {
+		return errors.New("context is nil")
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}

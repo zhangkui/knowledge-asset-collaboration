@@ -19,6 +19,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/search"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/share"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
@@ -34,11 +35,12 @@ type App struct {
 	Publisher          publish.Service
 	Shares             *share.Registry
 	SearchIndex        *search.Index
+	RecycleBin         *recycle.Bin
 	StartedAt          time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -78,6 +80,10 @@ func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
 
 func (a *App) SearchIndexed(ctx context.Context, query string) []search.Result {
 	return a.SearchIndex.Query(ctx, query)
+}
+
+func (a *App) PutRecycleItem(ctx context.Context, item recycle.Item) error {
+	return a.RecycleBin.Put(ctx, item)
 }
 
 func (a *App) Router() http.Handler {
