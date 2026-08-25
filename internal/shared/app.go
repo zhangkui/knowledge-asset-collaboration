@@ -728,7 +728,7 @@ func writeDomainError(w http.ResponseWriter, err error) {
 	if strings.Contains(err.Error(), "permission") {
 		status = 403
 	}
-	if strings.Contains(err.Error(), "conflicts") {
+	if errors.Is(err, catalog.ErrVersionConflict) || strings.Contains(err.Error(), "conflicts") {
 		status = 409
 	}
 	if errors.Is(err, contextCanceled) {

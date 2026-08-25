@@ -194,6 +194,11 @@ func checkContext(ctx context.Context) error {
 	return ctx.Err()
 }
 
+// ErrVersionConflict signals that an optimistic-concurrency save was rejected
+// because the client's expected version no longer matches the stored version.
+// It is wrapped (via %w) by SaveDraft so callers can detect it with errors.Is.
+var ErrVersionConflict = errors.New("document version conflict")
+
 func (s *Service) CreateWorkspace(ctx context.Context, ownerID, name, description string, visibility WorkspaceVisibility) (Workspace, error) {
 	if err := checkContext(ctx); err != nil {
 		return Workspace{}, err
@@ -447,7 +452,7 @@ func (s *Service) SaveDraft(ctx context.Context, actorID, id, body string, expec
 		return Document{}, errors.New("document edit permission required")
 	}
 	if expectedVersion != d.Version {
-		return Document{}, fmt.Errorf("version mismatch: expected %d current %d", expectedVersion, d.Version)
+		return Document{}, fmt.Errorf("version mismatch: expected %d current %d: %w", expectedVersion, d.Version, ErrVersionConflict)
 	}
 	d.Body = body
 	d.Version++
