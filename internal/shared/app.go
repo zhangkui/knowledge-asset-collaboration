@@ -19,6 +19,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/search"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/share"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
 )
@@ -32,11 +33,12 @@ type App struct {
 	Store              *postgres.Store
 	Publisher          publish.Service
 	Shares             *share.Registry
+	SearchIndex        *search.Index
 	StartedAt          time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -72,6 +74,10 @@ func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
 		return share.Link{}, errors.New("share expired")
 	}
 	return *link, nil
+}
+
+func (a *App) SearchIndexed(ctx context.Context, query string) []search.Result {
+	return a.SearchIndex.Query(ctx, query)
 }
 
 func (a *App) Router() http.Handler {
@@ -560,7 +566,13 @@ func (a *App) reviews(w http.ResponseWriter, r *http.Request, user, id string) {
 	writeJSON(w, 200, v)
 }
 func (a *App) search(w http.ResponseWriter, r *http.Request, user string) {
-	items, err := a.Catalog.Search(r.Context(), user, r.URL.Query().Get("q"))
+	query := r.URL.Query().Get("q")
+	if strings.HasPrefix(query, "index:") {
+		items := a.SearchIndexed(r.Context(), strings.TrimPrefix(query, "index:"))
+		writePage(w, items, len(items))
+		return
+	}
+	items, err := a.Catalog.Search(r.Context(), user, query)
 	if err != nil {
 		writeDomainError(w, err)
 		return
