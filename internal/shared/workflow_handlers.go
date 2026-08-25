@@ -162,3 +162,16 @@ func (a *App) recyclePut(w http.ResponseWriter, r *http.Request, user string) {
 	}
 	w.WriteHeader(http.StatusCreated)
 }
+
+func (a *App) cache(w http.ResponseWriter, r *http.Request, user, id string) {
+	if r.Method != http.MethodGet || id == "" {
+		writeError(w, http.StatusBadRequest, "cache key is required")
+		return
+	}
+	value, ok, err := a.ReadCache(r.Context(), id)
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"key": id, "value": string(value), "found": ok})
+}

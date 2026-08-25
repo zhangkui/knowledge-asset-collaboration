@@ -18,6 +18,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/redis"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/report"
@@ -34,6 +35,7 @@ type App struct {
 	NotificationCenter *notification.Center
 	Directory          *user.Directory
 	Store              *postgres.Store
+	Cache              *redis.Cache
 	Publisher          publish.Service
 	Shares             *share.Registry
 	SearchIndex        *search.Index
@@ -43,7 +45,7 @@ type App struct {
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), SessionStore: auth.NewSessionStore(), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, ReportAggregator: report.NewAggregator(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), SessionStore: auth.NewSessionStore(), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Cache: redis.New(), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, ReportAggregator: report.NewAggregator(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -87,6 +89,14 @@ func (a *App) SearchIndexed(ctx context.Context, query string) []search.Result {
 
 func (a *App) PutRecycleItem(ctx context.Context, item recycle.Item) error {
 	return a.RecycleBin.Put(ctx, item)
+}
+
+func (a *App) ReadCache(ctx context.Context, key string) ([]byte, bool, error) {
+	return a.Cache.Get(ctx, key)
+}
+
+func (a *App) PurgeCache(now time.Time) int {
+	return a.Cache.PurgeExpired(now)
 }
 
 func (a *App) Router() http.Handler {
@@ -198,6 +208,8 @@ func (a *App) api(w http.ResponseWriter, r *http.Request) {
 		a.recycle(w, r, claims.Subject, id)
 	case "reports":
 		a.reports(w, r, claims.Subject)
+	case "cache":
+		a.cache(w, r, claims.Subject, id)
 	case "attachments":
 		a.attachments(w, r, claims.Subject, id)
 	case "upload-state":
