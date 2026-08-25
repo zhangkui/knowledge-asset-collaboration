@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      DATABASE_URL: postgres://knowledge:knowledge@postgres:5432/knowledge?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: knowledge, POSTGRES_PASSWORD: knowledge, POSTGRES_DB: knowledge }
+  redis:
+    image: redis:7-alpine
