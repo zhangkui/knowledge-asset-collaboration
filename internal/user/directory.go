@@ -287,6 +287,7 @@ func (d *Directory) RolesForUser(ctx context.Context, userID string) ([]Role, er
 	out := []Role{}
 	for id := range ids {
 		if role, ok := d.roles[id]; ok {
+			role.Permissions = append([]string(nil), role.Permissions...)
 			out = append(out, role)
 		}
 	}
