@@ -17,6 +17,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
 )
 
@@ -26,11 +27,12 @@ type App struct {
 	NotificationCenter *notification.Center
 	Directory *user.Directory
 	Store *postgres.Store
+	Publisher publish.Service
 	StartedAt time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -46,6 +48,17 @@ func (a *App) RolesForUser(ctx context.Context, userID string) ([]user.Role, err
 func (a *App) RunTransaction(ctx context.Context, fn func(context.Context) error) error {
 	return a.Store.WithTransaction(ctx, fn)
 }
+func (a *App) PublishDocument(ctx context.Context, actorID, documentID string) (catalog.Document, error) {
+	document, err := a.Catalog.GetDocument(ctx, documentID)
+	if err != nil {
+		return catalog.Document{}, err
+	}
+	if _, err := a.Publisher.Publish(ctx, string(document.Status)); err != nil {
+		return catalog.Document{}, err
+	}
+	return a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished)
+}
+
 
 func (a *App) Router() http.Handler {
 	mux := http.NewServeMux()
@@ -325,6 +338,17 @@ func (a *App) documents(w http.ResponseWriter, r *http.Request, user, id string,
 			return
 		}
 		v, err := a.Catalog.SaveDraft(r.Context(), user, id, in.Body, in.ExpectedVersion)
+		if err != nil {
+			writeDomainError(w, err)
+			return
+		}
+		writeJSON(w, 200, v)
+	case "publish":
+		if r.Method != "POST" {
+			writeError(w, 405, "method not allowed")
+			return
+		}
+		v, err := a.PublishDocument(r.Context(), user, id)
 		if err != nil {
 			writeDomainError(w, err)
 			return
