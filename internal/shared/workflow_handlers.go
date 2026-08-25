@@ -2,6 +2,8 @@ package shared
 
 import (
 	"net/http"
+
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/attachment"
 	"strconv"
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
@@ -110,3 +112,18 @@ func (a *App) annotations(w http.ResponseWriter, r *http.Request, user, id strin
 
 var _ = strconv.IntSize
 var _ catalog.DocumentStatus
+
+func (a *App) uploadState(w http.ResponseWriter, r *http.Request, user, id string) {
+	if r.Method != http.MethodGet || id == "" {
+		writeError(w, http.StatusBadRequest, "upload id is required")
+		return
+	}
+	item, err := a.Uploads.Get(r.Context(), id)
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
+}
+
+var _ attachment.Chunk

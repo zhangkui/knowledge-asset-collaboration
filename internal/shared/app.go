@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/attachment"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/auth"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
@@ -23,22 +24,23 @@ import (
 )
 
 type App struct {
-	Catalog   *catalog.Service
-	Auth      auth.Service
+	Catalog            *catalog.Service
+	Uploads            *attachment.Manager
+	Auth               auth.Service
 	NotificationCenter *notification.Center
-	Directory *user.Directory
-	Store *postgres.Store
-	Publisher publish.Service
-	Shares *share.Registry
-	StartedAt time.Time
+	Directory          *user.Directory
+	Store              *postgres.Store
+	Publisher          publish.Service
+	Shares             *share.Registry
+	StartedAt          time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
-			a.NotificationCenter = notification.NewCenter()
+		a.NotificationCenter = notification.NewCenter()
 	}
 	return a.NotificationCenter.Push(ctx, n)
 }
@@ -60,7 +62,6 @@ func (a *App) PublishDocument(ctx context.Context, actorID, documentID string) (
 	}
 	return a.Catalog.ChangeDocumentStatus(ctx, actorID, documentID, catalog.DocumentPublished)
 }
-
 
 func (a *App) OpenShare(ctx context.Context, token string) (share.Link, error) {
 	link, err := a.Shares.Lookup(ctx, token)
@@ -180,6 +181,8 @@ func (a *App) api(w http.ResponseWriter, r *http.Request) {
 		a.reports(w, r, claims.Subject)
 	case "attachments":
 		a.attachments(w, r, claims.Subject, id)
+	case "upload-state":
+		a.uploadState(w, r, claims.Subject, id)
 	case "annotations":
 		a.annotations(w, r, claims.Subject, id)
 	case "tags":
