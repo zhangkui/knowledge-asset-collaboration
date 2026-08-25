@@ -9,7 +9,6 @@ import (
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
-	"github.com/zhangkui/knowledge-asset-collaboration/internal/report"
 )
 
 func (a *App) recycle(w http.ResponseWriter, r *http.Request, user, id string) {
