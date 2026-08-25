@@ -16,6 +16,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/auth"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/notification"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
 )
 
@@ -24,11 +25,12 @@ type App struct {
 	Auth      auth.Service
 	NotificationCenter *notification.Center
 	Directory *user.Directory
+	Store *postgres.Store
 	StartedAt time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
@@ -39,6 +41,10 @@ func (a *App) PublishNotification(ctx context.Context, n notification.Notificati
 
 func (a *App) RolesForUser(ctx context.Context, userID string) ([]user.Role, error) {
 	return a.Directory.RolesForUser(ctx, userID)
+}
+
+func (a *App) RunTransaction(ctx context.Context, fn func(context.Context) error) error {
+	return a.Store.WithTransaction(ctx, fn)
 }
 
 func (a *App) Router() http.Handler {

@@ -46,5 +46,12 @@ func (s *Store) WithTransaction(ctx context.Context, fn func(context.Context) er
 	if fn == nil {
 		return errors.New("transaction callback is required")
 	}
-	return fn(ctx)
+	err := fn(ctx)
+	if err != nil {
+		return err
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return nil
 }
