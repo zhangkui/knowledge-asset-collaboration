@@ -106,6 +106,21 @@ func (s *Scheduler) Due(ctx context.Context, now time.Time) ([]Schedule, error) 
 	sort.Slice(out, func(i, j int) bool { return out[i].NextRun.Before(out[j].NextRun) })
 	return out, nil
 }
+func (s *Scheduler) EnqueueDue(ctx context.Context, q *Queue, now time.Time) (int, error) {
+	if q == nil {
+		return 0, errors.New("task queue is required")
+	}
+	due, err := s.Due(ctx, now)
+	if err != nil {
+		return 0, err
+	}
+	for _, schedule := range due {
+		if err := q.Enqueue(ctx, Job{ID: schedule.ID, Kind: schedule.Kind}); err != nil {
+			return 0, err
+		}
+	}
+	return len(due), nil
+}
 func (s *Scheduler) Complete(ctx context.Context, id string, success bool, runErr error) (Schedule, error) {
 	if ctx == nil {
 		return Schedule{}, errors.New("context is nil")
