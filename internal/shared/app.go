@@ -20,6 +20,7 @@ import (
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/platform/postgres"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/publish"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/report"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/search"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/share"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/user"
@@ -36,11 +37,12 @@ type App struct {
 	Shares             *share.Registry
 	SearchIndex        *search.Index
 	RecycleBin         *recycle.Bin
+	ReportAggregator   *report.Aggregator
 	StartedAt          time.Time
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, ReportAggregator: report.NewAggregator(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {

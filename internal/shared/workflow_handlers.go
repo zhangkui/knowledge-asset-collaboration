@@ -5,9 +5,11 @@ import (
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/attachment"
 	"strconv"
+	"time"
 
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/catalog"
 	"github.com/zhangkui/knowledge-asset-collaboration/internal/recycle"
+	"github.com/zhangkui/knowledge-asset-collaboration/internal/report"
 )
 
 func (a *App) recycle(w http.ResponseWriter, r *http.Request, user, id string) {
@@ -40,12 +42,27 @@ func (a *App) reports(w http.ResponseWriter, r *http.Request, user string) {
 		writeError(w, 405, "method not allowed")
 		return
 	}
-	report, err := a.Catalog.Report(r.Context(), r.URL.Query().Get("workspace_id"))
+	if r.URL.Query().Get("source") == "aggregator" {
+		from := time.Now().Add(-24 * time.Hour)
+		to := time.Now().Add(24 * time.Hour)
+		dashboard, err := a.ReportAggregator.Build(r.Context(), r.URL.Query().Get("workspace_id"), from, to)
+		if err != nil {
+			writeDomainError(w, err)
+			return
+		}
+		dashboard = a.ReportAggregator.CloneDashboard(dashboard)
+		if limit, err := strconv.Atoi(r.URL.Query().Get("top_limit")); err == nil && limit > 0 && limit < len(dashboard.TopDocuments) {
+			dashboard.TopDocuments = dashboard.TopDocuments[:limit]
+		}
+		writeJSON(w, 200, dashboard)
+		return
+	}
+	result, err := a.Catalog.Report(r.Context(), r.URL.Query().Get("workspace_id"))
 	if err != nil {
 		writeDomainError(w, err)
 		return
 	}
-	writeJSON(w, 200, report)
+	writeJSON(w, 200, result)
 }
 func (a *App) attachments(w http.ResponseWriter, r *http.Request, user, id string) {
 	if r.Method == http.MethodGet {

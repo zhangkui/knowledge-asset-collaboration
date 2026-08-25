@@ -154,6 +154,14 @@ func top(src map[string]Ranking) []Ranking {
 	}
 	return out
 }
+func (a *Aggregator) CloneDashboard(in Dashboard) Dashboard {
+	out := in
+	out.Trend = append([]DailyPoint(nil), in.Trend...)
+	out.TopDocuments = append([]Ranking(nil), in.TopDocuments...)
+	out.TopTags = append([]Ranking(nil), in.TopTags...)
+	out.TopUsers = append([]Ranking(nil), in.TopUsers...)
+	return out
+}
 func (a *Aggregator) Reset(ctx context.Context, workspace string) error {
 	if ctx == nil {
 		return errors.New("context is nil")
