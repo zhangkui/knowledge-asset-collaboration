@@ -58,11 +58,14 @@ func (s *SessionStore) Lookup(ctx context.Context, id string) (Session, error) {
 	}
 	return session, nil
 }
-func (s *SessionStore) Touch(ctx context.Context, id string) (Session, error) {
+func sessionContextError(ctx context.Context) error {
 	if ctx == nil {
-		return Session{}, errors.New("context is nil")
+		return errors.New("context is nil")
 	}
-	if err := ctx.Err(); err != nil {
+	return ctx.Err()
+}
+func (s *SessionStore) Touch(ctx context.Context, id string) (Session, error) {
+	if err := sessionContextError(ctx); err != nil {
 		return Session{}, err
 	}
 	s.mu.Lock()

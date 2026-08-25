@@ -43,7 +43,7 @@ type App struct {
 }
 
 func NewApp() *App {
-	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, ReportAggregator: report.NewAggregator(), StartedAt: time.Now()}
+	return &App{Catalog: catalog.NewService(), Uploads: attachment.NewManager(), Auth: auth.NewService("development-secret-change-me"), SessionStore: auth.NewSessionStore(), NotificationCenter: notification.NewCenter(), Directory: user.NewDirectory(), Store: postgres.New(nil), Publisher: publish.Service{}, Shares: share.NewRegistry(), SearchIndex: search.NewIndex(), RecycleBin: &recycle.Bin{}, ReportAggregator: report.NewAggregator(), StartedAt: time.Now()}
 }
 func (a *App) PublishNotification(ctx context.Context, n notification.Notification) error {
 	if a.NotificationCenter == nil {
